@@ -4,33 +4,34 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://mayanksweb.online', // your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 app.use(express.json());
-
-app.get('/', (req, res) => {
-    res.send('API is running 🚀');
-});
 
 app.get('/test', async (req, res) => {
     res.status(200).send('test server working');
-})
+});
 
 app.post('/send-email', async (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, subject, message } = req.body;
 
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS // 🔥 important 
+        pass: process.env.EMAIL_PASS
       }
     });
 
     await transporter.sendMail({
-      from: email,
+      from: process.env.EMAIL_USER,
+      replyTo: email,
       to: 'mayanksweb.online@gmail.com',
-      subject: 'New Contact Inquiry',
+      subject: subject || 'New Contact Inquiry',
       html: `
         <h3>New Message</h3>
         <p><b>Name:</b> ${name}</p>
@@ -39,10 +40,11 @@ app.post('/send-email', async (req, res) => {
       `
     });
 
-    res.status(200).send('Email sent');
+    res.status(200).json({ success: true, message: 'Email sent12' });
+
   } catch (error) {
-    console.log(error);
-    res.status(500).send('Error sending email');
+    console.error('Email error:', error);
+    res.status(500).json({ success: false, message: 'Error sending email' });
   }
 });
 
