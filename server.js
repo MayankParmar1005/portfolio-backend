@@ -4,8 +4,28 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
+
+// 1. PLACE CORS CONFIGURATION HERE (Before any routes)
+app.use(cors({
+  origin: 'https://mayanksweb.online', 
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // Helpful if you ever use cookies/sessions
+}));
+
+// 2. HANDLE PREFLIGHT REQUESTS
+// This ensures that the browser's "OPTIONS" check passes immediately
+app.options('*', cors());
+
+app.get('/', (req, res) => {
+    res.send('API is running 🚀');
+});
+
+app.get('/test', async (req, res) => {
+    res.status(200).send('test server working');
+})
 
 app.post('/send-email', async (req, res) => {
   const { name, email, message } = req.body;
