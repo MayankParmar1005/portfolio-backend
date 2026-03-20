@@ -20,7 +20,16 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/portfolio-backend
-            git pull origin main
-            npm install --production
-            pm2 restart all || pm2 start index.js --name "portfolio-backend"
+            # 1. Navigate to the directory
+            cd /home/ubuntu/portfolio-backend || exit
+
+            # 2. Force Git to overwrite local changes with GitHub code
+            git fetch --all
+            git reset --hard origin/main
+
+            # 3. Install dependencies
+            npm install --omit=dev
+
+            # 4. Restart using server.js (since that is your entry point)
+            # We use --name to give it a consistent ID
+            pm2 restart portfolio-backend || pm2 start server.js --name "portfolio-backend"
